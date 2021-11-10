@@ -10,15 +10,19 @@
   "scripts": {
     "test": "npx spago test",
     "install": "npx spago install",
-    "bundle": "npx spago bundle-app",
+    "bundle": "npx spago build && npx spago bundle-app",
     "serve": "npx http-server",
     "start": "npm run install && npm run bundle && npm run serve"
   },
   "author": "Mateusz Goślinowski",
   "license": "MIT",
   "devDependencies": {
+    "big-integer": "^1.6.51",
     "http-server": "^14.0.0",
     "purescript": "^0.14.5",
     "spago": "^0.20.3"
+  },
+  "dependencies": {
+    "purescript-language-server": "^0.15.8"
   }
 }
