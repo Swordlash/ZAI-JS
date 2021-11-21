@@ -18,12 +18,17 @@ to generate this file without the comments in this block.
   , "effect"
   , "fixed-precision"
   , "foldable-traversable"
+  , "formatters"
   , "halogen"
+  , "lists"
   , "maybe"
+  , "newtype"
   , "partial"
   , "prelude"
   , "psci-support"
   , "quickcheck"
+  , "record"
+  , "safe-coerce"
   , "strings"
   ]
 , packages = ./packages.dhall

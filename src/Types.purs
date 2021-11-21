@@ -9,12 +9,14 @@ import Data.Date.Gen (genDate)
 import Data.Fixed (Fixed, P100, fromNumber, toNumber)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (fromJust)
+import Data.Newtype (class Newtype)
 import Data.Show.Generic (genericShow)
 import Data.String (joinWith)
 import Data.Traversable (sequence)
 import Partial.Unsafe (unsafePartial)
 import Test.QuickCheck.Arbitrary (class Arbitrary, arbitrary, genericArbitrary)
 import Test.QuickCheck.Gen (Gen, elements)
+import Utils (formatDate)
 
 ----------------------------------------
 
@@ -37,15 +39,23 @@ newtype Description = Description String
 newtype IssueDate   = IssueDate Date
 newtype Money = Money (Fixed P100)
 
-newtype Book = Book
-  { title       :: Title
+type BookRec =
+  ( title       :: Title
   , description :: Description
   , imageUrl    :: URL
   , price       :: Money
   , author      :: Author
   , subject     :: Subject
   , issueDate   :: IssueDate
-  }
+  )
+
+newtype Book = Book (Record BookRec)
+newtype Books = Books (Array Book)
+
+derive instance Newtype Book _
+derive instance Newtype Books _
+
+derive newtype instance Show Books
 
 -------------- INSTANCES ---------------
 
@@ -75,8 +85,8 @@ instance Show Title where
 
 instance Arbitrary Description where
   arbitrary = twoPartGen Description
-    [ "Wonderful", "Nice", "Insightful", "Best selling", "Ingenious" ]
-    [ "book", "coursebook for students", "thing to read", "read" ]
+    [ "Wonderful", "Nice", "Insightful", "Best selling", "Ingenious", "A hard-to-forget" ]
+    [ "book", "coursebook for students", "thing to read", "read", "story" ]
 
 instance Show Description where
   show (Description d) = d
@@ -84,7 +94,9 @@ instance Show Description where
 -----------------------------------------
 
 instance Arbitrary URL where
-  arbitrary = pure $ URL "https://picsum.photos/256"
+  arbitrary = do
+    seed <- arbitrary :: Gen Int
+    pure $ URL $ "https://picsum.photos/seed/" <> show seed <> "/128"
 
 instance Show URL where
   show (URL u) = u
@@ -106,7 +118,7 @@ instance Arbitrary IssueDate where
   arbitrary = map IssueDate genDate
 
 instance Show IssueDate where
-  show (IssueDate d) = show d
+  show (IssueDate d) = formatDate d
 
 -----------------------------------------
 
