@@ -14,15 +14,19 @@ to generate this file without the comments in this block.
 , dependencies =
   [ "arrays"
   , "console"
+  , "control"
+  , "css"
   , "datetime"
   , "effect"
   , "fixed-precision"
   , "foldable-traversable"
   , "formatters"
   , "halogen"
+  , "halogen-css"
   , "lists"
   , "maybe"
   , "newtype"
+  , "numbers"
   , "partial"
   , "prelude"
   , "psci-support"
@@ -30,6 +34,7 @@ to generate this file without the comments in this block.
   , "record"
   , "safe-coerce"
   , "strings"
+  , "unsafe-coerce"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

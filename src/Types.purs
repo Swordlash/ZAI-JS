@@ -47,14 +47,16 @@ type BookRec =
   , author      :: Author
   , subject     :: Subject
   , issueDate   :: IssueDate
+  , id          :: Int
   )
 
 newtype Book = Book (Record BookRec)
 newtype Books = Books (Array Book)
 
 derive instance Newtype Book _
-derive instance Newtype Books _
+derive newtype instance Eq Book
 
+derive instance Newtype Books _
 derive newtype instance Show Books
 
 -------------- INSTANCES ---------------
@@ -81,6 +83,9 @@ instance Arbitrary Title where
 instance Show Title where
   show (Title t) = t
 
+derive instance Eq Title
+derive instance Ord Title
+
 -----------------------------------------
 
 instance Arbitrary Description where
@@ -91,6 +96,8 @@ instance Arbitrary Description where
 instance Show Description where
   show (Description d) = d
 
+derive instance Eq Description
+
 -----------------------------------------
 
 instance Arbitrary URL where
@@ -100,6 +107,8 @@ instance Arbitrary URL where
 
 instance Show URL where
   show (URL u) = u
+
+derive instance Eq URL
 
 -----------------------------------------
 
@@ -112,6 +121,8 @@ instance Arbitrary Author where
 instance Show Author where
   show (Author {name, surname}) = surname <> ", " <> name
 
+derive instance Eq Author
+
 -----------------------------------------
 
 instance Arbitrary IssueDate where
@@ -119,6 +130,8 @@ instance Arbitrary IssueDate where
 
 instance Show IssueDate where
   show (IssueDate d) = formatDate d
+
+derive instance Eq IssueDate
 
 -----------------------------------------
 
@@ -130,13 +143,23 @@ instance Arbitrary Subject where
 instance Show Subject where
   show = genericShow
 
+derive instance Eq Subject
+
 -----------------------------------------
 
+mkUnsafeMoney :: Number -> Money
+mkUnsafeMoney = unsafePartial $ Money <<< fromJust <<< fromNumber
+
+derive instance Newtype Money _
+
 instance Arbitrary Money where
-  arbitrary = map (unsafePartial $ Money <<< fromJust <<< fromNumber <<< (_ * 100.0)) arbitrary
+  arbitrary = map (mkUnsafeMoney <<< (_ * 100.0)) arbitrary
 
 instance Show Money where
   show (Money m) = show $ toNumber m
+
+derive instance Eq Money
+derive instance Ord Money
 
 -----------------------------------------
 
