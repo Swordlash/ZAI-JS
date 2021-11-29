@@ -1,11 +1,14 @@
 -- | A big "Types" module is usually a bad practice, but we create such a module for simplicity
 module Types where
 
+import Data.Enum
 import Prelude
 
 import Data.Array.NonEmpty.Internal (NonEmptyArray(..))
+import Data.Bounded.Generic (genericBottom, genericTop)
 import Data.Date (Date)
 import Data.Date.Gen (genDate)
+import Data.Enum.Generic (genericCardinality, genericFromEnum, genericPred, genericSucc, genericToEnum)
 import Data.Fixed (Fixed, P100, fromNumber, toNumber)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (fromJust)
@@ -39,6 +42,8 @@ newtype Description = Description String
 newtype IssueDate   = IssueDate Date
 newtype Money = Money (Fixed P100)
 
+data ModifyMode = On | Off
+
 type BookRec =
   ( title       :: Title
   , description :: Description
@@ -48,6 +53,7 @@ type BookRec =
   , subject     :: Subject
   , issueDate   :: IssueDate
   , id          :: Int
+  , modifyMode  :: ModifyMode
   )
 
 newtype Book = Book (Record BookRec)
@@ -144,6 +150,20 @@ instance Show Subject where
   show = genericShow
 
 derive instance Eq Subject
+derive instance Ord Subject
+
+instance Bounded Subject where
+  bottom = genericBottom
+  top = genericTop
+
+instance Enum Subject where
+  succ = genericSucc
+  pred = genericPred
+
+instance BoundedEnum Subject where
+  toEnum = genericToEnum
+  fromEnum = genericFromEnum
+  cardinality = genericCardinality
 
 -----------------------------------------
 
@@ -160,6 +180,17 @@ instance Show Money where
 
 derive instance Eq Money
 derive instance Ord Money
+
+-----------------------------------------
+
+instance Show ModifyMode where
+  show On  = "On"
+  show Off = "Off"
+
+instance Arbitrary ModifyMode where
+  arbitrary = pure Off
+
+derive instance Eq ModifyMode
 
 -----------------------------------------
 

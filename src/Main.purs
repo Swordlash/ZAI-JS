@@ -8,7 +8,7 @@ import Safe.Coerce
 import Unsafe.Coerce
 
 import CSS as CSS
-import Data.Array (filter, sortBy)
+import Data.Array (cons, filter, sortBy, uncons)
 import Data.Fixed (toNumber, fromNumber)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap, wrap)
@@ -27,9 +27,9 @@ import Halogen.HTML.Properties (ButtonType(..), InputType(..))
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI) as HD
 import Test.QuickCheck (arbitrary)
-import Test.QuickCheck.Gen (randomSample)
+import Test.QuickCheck.Gen (randomSample, randomSampleOne)
 import Type.Proxy (Proxy(..))
-import Types (Book(..), BookRec, Books(..), Money(..), mkUnsafeMoney)
+import Types (Book(..), BookRec, Books(..), ModifyMode(..), Money(..), mkUnsafeMoney)
 import Utils (cl, cls)
 
 main :: Effect Unit
@@ -63,6 +63,7 @@ data Action
   | FilterToPrice String
   | Filter
   | ClearFilter
+  | AddNew
 
 component :: forall q i o m. MonadEffect m => H.Component q i o m
 component = H.mkComponent
@@ -95,7 +96,7 @@ component = H.mkComponent
         HH.ul [ cls [ "list-group", "list-group-flush"] ]
         [ HH.li [ cl "list-group-item" ] $ pure $ HH.div [ cl "row" ] []
         , HH.li [ cl "list-group-item" ] $ pure $ HH.div [ cl "row" ]
-          [ HH.h3 [ cl "card-title", cl "col-12" ] [ HH.text "Sort" ]
+          [ HH.h3 [ cls [ "card-title", "col-12" ] ] [ HH.text "Sort" ]
           , HH.div [ cl "col-7" ] 
             $ pure 
             $ HH.button [ cls ["btn", "btn-primary" ]
@@ -131,8 +132,8 @@ component = H.mkComponent
             ]
           ]
         , HH.li [ cl "list-group-item " ] $ pure $ HH.div [cl "row" ] 
-          [ HH.h3 [ cl "card-title", cl "col-12" ] [ HH.text "Filter" ]
-          , HH.div [ cl "mb-3", cl "row" ] 
+          [ HH.h3 [ cls ["card-title",  "col-12"] ] [ HH.text "Filter" ]
+          , HH.div [ cls ["mb-3", "row"] ] 
             [ HH.label [ cls [ "col-10", "col-form-label" ], HP.for "fromPrice" ] [ HH.text "From price:" ] 
             , HH.input [ cls [ "form-control", "col-2" ]
                      , HP.type_ InputNumber
@@ -141,7 +142,7 @@ component = H.mkComponent
                      , HE.onValueChange FilterFromPrice
                      ]
             ]
-          , HH.div [ cl "mb-3", cl "row" ] 
+          , HH.div [ cls [ "mb-3", "row"] ] 
             [ HH.label [ cls [ "col-10", "col-form-label" ], HP.for "toPrice" ] [ HH.text "To price:" ] 
             , HH.input [ cls [ "form-control", "col-2" ]
                      , HP.type_ InputNumber
@@ -163,6 +164,15 @@ component = H.mkComponent
                       ] 
                       [ HH.text "Clear filter" ]
           ]
+        , HH.li [ cl "list-group-item " ] 
+            $ pure 
+            $ HH.div [ cl "row" ]
+            $ pure
+            $ HH.button [ cls ["btn", "btn-info" ]
+                        , HP.type_ ButtonButton 
+                        , HE.onClick \_ -> AddNew
+                        ] 
+                        [ HH.text "Add new item" ]
         ]
       
       body = 
@@ -180,7 +190,16 @@ component = H.mkComponent
         where 
           removeId :: Books -> Books
           removeId (Books books) = Books $ filter (\(Book b) -> b.id /= id) $ books
-      ChangeId id f -> pure unit
+
+      ChangeId id f -> H.modify_ \st -> st { books = changeid st.books, view = changeid st.view }
+        where
+          changeid :: Books -> Books
+          changeid (Books bs) = case uncons bs of
+            Nothing -> Books []
+            Just { head: b@(Book br), tail } ->
+              if br.id == id 
+                then Books $ cons (Book $ f br) tail
+                else Books $ cons b $ unwrap $ changeid $ Books tail
 
     handleAction :: forall output. Action -> H.HalogenM State Action Slots output m Unit
     handleAction = case _ of
@@ -210,6 +229,11 @@ component = H.mkComponent
         H.modify_ _ { fromPrice = mkUnsafeMoney 0.0, toPrice = mkUnsafeMoney 100.0 }
         handleAction Filter
 
+      AddNew -> do
+        defBook <- map (\(Book b) -> Book b { modifyMode = On }) $ liftEffect $ randomSampleOne arbitrary
+        H.modify_ \st -> st { books = wrap $ cons defBook $ unwrap st.books
+                            , view  = wrap $ cons defBook $ unwrap st.view
+                            }
 
       where
         invertCmp :: forall a. Boolean -> (a -> a -> Ordering) -> (a -> a -> Ordering)

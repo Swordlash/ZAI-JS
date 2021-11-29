@@ -18,4 +18,4 @@ cls = HP.classes <<< map HH.ClassName
 
 formatDate :: Date -> String
 formatDate d =
-  format (fromFoldable [DayOfMonth, Placeholder "-", MonthTwoDigits, Placeholder "-", YearFull]) (DateTime d bottom)
+  format (fromFoldable [YearFull, Placeholder "-", MonthTwoDigits, Placeholder "-", DayOfMonth]) (DateTime d bottom)
