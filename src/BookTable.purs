@@ -2,7 +2,7 @@ module BookTable where
 
 import Prelude
 
-import CSS as CSS
+import CSS (height, px) as CSS
 import Control.Alternative (guard)
 import Data.Enum (enumFromTo, fromEnum, toEnum)
 import Data.Fixed (fromNumber)
@@ -15,12 +15,12 @@ import Data.String (Pattern(..), drop, indexOf, take)
 import Effect.Unsafe (unsafePerformEffect)
 import Halogen as H
 import Halogen.HTML as HH
-import Halogen.HTML.CSS as CSS
+import Halogen.HTML.CSS (style) as CSS
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (InputType(..))
 import Halogen.HTML.Properties as HP
 import Partial.Unsafe (unsafePartial)
-import Types (Author(..), Book(..), BookRec, Books, Description(..), IssueDate(..), ModifyMode(..), Money(..), Title(..), mkUnsafeMoney)
+import Types (Author(..), Book(..), BookRec, Books, Description(..), IssueDate(..), ModifyMode(..), Money(..), Title(..), URL(..))
 import Utils (cl, cls)
 
 type Input  = Books
@@ -93,7 +93,11 @@ render {books} = HH.table [ cl "table" ] [ thead, tbody ]
                               , HP.value (show book.description) 
                               , HE.onValueChange $ \str -> Raise $ ChangeId book.id (_ { description = Description str })
                               ]
-        , toTd' $ HH.img [ HP.src (show book.imageUrl) ]
+        , toTd' $ HH.input [ HP.type_ InputText
+                           , cl "form-control"
+                           , HP.value $ show book.imageUrl
+                           , HE.onValueChange $ \str -> Raise $ ChangeId book.id ( _ { imageUrl = URL str })
+                           ]
         , toTd' $ HH.input [ HP.type_ InputNumber
                            , cl "form-control"
                            , HP.value (show book.price) 

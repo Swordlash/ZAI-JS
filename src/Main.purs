@@ -1,13 +1,10 @@
 module Main where
 
-import BookTable
-import Control.Alternative
-import Control.Monad
+import BookTable (Output(..), bookTable)
 import Prelude
-import Safe.Coerce
-import Unsafe.Coerce
+import Safe.Coerce (coerce)
 
-import CSS as CSS
+import CSS (height, px) as CSS
 import Data.Array (cons, filter, sortBy, uncons)
 import Data.Fixed (toNumber, fromNumber)
 import Data.Maybe (Maybe(..))
@@ -17,11 +14,10 @@ import Data.Ordering (invert)
 import Data.Traversable (for_)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
-import Halogen.HTML.CSS as CSS
+import Halogen.HTML.CSS (style) as CSS
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (ButtonType(..), InputType(..))
 import Halogen.HTML.Properties as HP
@@ -41,7 +37,8 @@ main = HA.runHalogenAff do
 
 type Slots = ( bookTable :: forall q. H.Slot q Output Unit )
 
-_bookTable = Proxy :: _ "bookTable"
+_bookTable = Proxy :: Proxy
+ "bookTable"
 
 type State = 
   { books :: Books 

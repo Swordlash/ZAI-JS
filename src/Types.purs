@@ -1,7 +1,7 @@
 -- | A big "Types" module is usually a bad practice, but we create such a module for simplicity
 module Types where
 
-import Data.Enum
+import Data.Enum (class BoundedEnum, class Enum)
 import Prelude
 
 import Data.Array.NonEmpty.Internal (NonEmptyArray(..))
