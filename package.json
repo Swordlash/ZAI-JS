@@ -10,8 +10,8 @@
     "test": "npx spago test",
     "install": "npx spago install",
     "clean": "mkdir -p dist && rm -rf dist/*",
-    "bundle": "npx spago build && npx spago bundle-app && npm run clean && npx parcel build index.html",
-    "serve": "http-server dist/",
+    "bundle": "npx spago build && npx spago bundle-app && npm run clean && npx parcel build index.html && npx showdown makehtml -i README.md -o dist/README.html && cp -r screenshots dist",
+    "serve": "http-server -c-1 dist/",
     "start": "npm run install && npm run bundle && npm run serve"
   },
   "author": "Mateusz Goślinowski",
@@ -19,10 +19,11 @@
   "devDependencies": {
     "http-server": "^14.0.0",
     "parcel": "^2.0.1",
-    "purescript": "^0.14.5",
-    "purescript-language-server": "^0.16.0",
+    "purescript": "^0.14.9",
+    "purescript-language-server": "^0.16.6",
     "purescript-psa": "^0.8.2",
-    "spago": "^0.20.3"
+    "showdown": "^2.1.0",
+    "spago": "^0.20.7"
   },
   "dependencies": {
     "big-integer": "^1.6.51"

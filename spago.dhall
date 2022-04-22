@@ -36,6 +36,7 @@ to generate this file without the comments in this block.
   , "quickcheck"
   , "safe-coerce"
   , "strings"
+  , "web-html"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

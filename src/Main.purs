@@ -1,9 +1,9 @@
 module Main where
 
-import BookTable (Output(..), bookTable)
 import Prelude
-import Safe.Coerce (coerce)
 
+import About (about)
+import BookTable (Output(..), bookTable)
 import CSS (height, px) as CSS
 import Data.Array (cons, filter, sortBy, uncons)
 import Data.Fixed (toNumber, fromNumber)
@@ -22,6 +22,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (ButtonType(..), InputType(..))
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI) as HD
+import Safe.Coerce (coerce)
 import Test.QuickCheck (arbitrary)
 import Test.QuickCheck.Gen (randomSample, randomSampleOne)
 import Type.Proxy (Proxy(..))
@@ -35,10 +36,15 @@ main = HA.runHalogenAff do
 
 -------------------------------------------------------------
 
-type Slots = ( bookTable :: forall q. H.Slot q Output Unit )
+type Slots = ( bookTable :: forall q. H.Slot q Output Unit 
+             , about :: forall q o. H.Slot q o Unit
+             )
 
 _bookTable = Proxy :: Proxy
  "bookTable"
+
+data Page = Home | About
+derive instance Eq Page
 
 type State = 
   { books :: Books 
@@ -47,6 +53,7 @@ type State =
   , sortPriceDescending :: Boolean
   , fromPrice :: Money
   , toPrice   :: Money
+  , page :: Page
   }
 
 data Action
@@ -61,6 +68,7 @@ data Action
   | Filter
   | ClearFilter
   | AddNew
+  | SwitchPage Page
 
 component :: forall q i o m. MonadEffect m => H.Component q i o m
 component = H.mkComponent
@@ -70,6 +78,7 @@ component = H.mkComponent
                         , sortPriceDescending: false 
                         , fromPrice: mkUnsafeMoney 0.0
                         , toPrice: mkUnsafeMoney 100.0
+                        , page: Home
                         }
   , render
   , eval: H.mkEval H.defaultEval { handleAction = handleAction
@@ -79,12 +88,24 @@ component = H.mkComponent
   where
     render :: State -> _
     render state = 
-      HH.div [ cl "container" ] [ title, content ]
+      HH.div [ cl "container" ] [ nav, content ]
     
       where
 
-      title   = HH.div [ cl "row" ] [ HH.h1_ [ HH.text "Bookstore" ] ]
-      content = HH.div [ cl "row" ] [ menu, table ]
+      nav = 
+        HH.nav [ cls [ "navbar", "navbar-xpand-lg", "navbar-dark", "bg-dark" ] ]
+          $ pure
+          $ HH.div [ cls [ "container-fluid", "justify-content-start" ] ]
+            [ HH.a [ cl "navbar-brand", HP.href "#" ] [ HH.text "Bookstore" ]
+            , HH.button [ classes Home, HE.onClick \_ -> SwitchPage Home ] [ HH.text "Home" ]
+            , HH.button [ classes About, HE.onClick \_ -> SwitchPage About ] [ HH.text "About" ]
+            ] 
+
+      classes p = cls if state.page == p then [ "btn", "btn-light", "btn-outline" ] else [ "btn", "btn-outline-secondary" ]
+
+      content = case state.page of
+        Home -> HH.div [ cl "row" ] [ menu, table ]
+        About -> HH.slot_ (Proxy :: Proxy "about") unit about unit
 
       menu = 
         HH.div [ cl "col-md-3 card" ] [ body ]
@@ -231,6 +252,8 @@ component = H.mkComponent
         H.modify_ \st -> st { books = wrap $ cons defBook $ unwrap st.books
                             , view  = wrap $ cons defBook $ unwrap st.view
                             }
+      
+      SwitchPage page -> H.modify_ _ { page = page }
 
       where
         invertCmp :: forall a. Boolean -> (a -> a -> Ordering) -> (a -> a -> Ordering)

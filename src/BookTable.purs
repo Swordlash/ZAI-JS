@@ -65,7 +65,7 @@ render {books} = HH.table [ cl "table" ] [ thead, tbody ]
         , toTd $ show $ book.issueDate
         , toTd $ show $ book.subject
         , toTd $ show $ book.description
-        , toTd' $ HH.img [ HP.src (show book.imageUrl) ]
+        , toTd' $ HH.img [ HP.src (show book.imageUrl), HP.alt "Book cover image" ]
         , toTd $ ("$" <> show book.price)
         , modifyColumn
         ]

@@ -6,6 +6,7 @@ Table of Contents
   - [Halogen framework](#halogen-framework)
 - [Source code walkthrough](#source-code-walkthrough)
   - [BookTable.purs](#booktablepurs)
+  - [About.purs and About.js](#aboutpurs-and-aboutjs)
   - [Types.purs](#typespurs)
   - [Utils.purs](#utilspurs)
   - [Main.purs](#mainpurs)
@@ -84,6 +85,10 @@ The code is divided into four modules: `BookTable`, `Types`, `Utils` and `Main`.
 The `BookTable` module implements a component that renders a collection of `Book`s. The component receives a `Books` object to render from the parent component and raises any modification/deletion events. A main function is the `render` function, which creates a table. Each `Book` in the collection is rendered as a HTML row, according to whether it is currently modified or not (governed by a check button in the last column).
 
 ![booktable](screenshots/BookTable.png "BookTable rendered component")
+
+## About.purs and About.js
+
+Render this README into the HTML viewport.
 
 ## Types.purs
 
